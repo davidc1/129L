@@ -1,83 +1,67 @@
+import numpy as np
 
-# return the baseline and RMS of a waveform within a given tick-range
+# CONSTANTS                                                                                                                           
+BASELINEDEFAULT = 2050
+BASETOLERANCE = 1
+RMSCUT = 2.
+
+
+#inputs:
+# wf -> waveform
+# tickstart -> first tick for baseline calculation
+# tickend -> last tick for baseline calculation
 def GetBaselineAndRMS(wf,tickstart,tickend):
-    baseline = wf[tickstart:tickend]
-    return np.mean(baseline),np.std(baseline)
+    base = 0
+    rms = 0
+    return base,rms
 
-# Find Single Photo-Electrons within a given tick-range
+# find SPEs in a given tick range
+# inputs:
+# wf -> waveform
+# tickstart -> where to start looking for pulses
+# tickend -> where to stop looking for pulses
+# threshold -> threshold to trigger a pulse ID
 def FindSPE(wf,tickstart,tickend,threshold):
-    subwf = wf[tickstart:tickend]
-    foundstart = False
-    starttick = 0
-    thistick = 0
-    maxticks = len(subwf)-1
-    while ( (foundstart == False) and (thistick < maxticks) ):
-        if (subwf[thistick] > threshold):
-            starttick = thistick
-            foundstart = True
-        thistick += 1
-    return starttick + tickstart
+    pulsetick = 0
+    return pulsetick
+
 
 # once we have an SPE, is there enough of a buffer?
 # make sure the buffer region does not have other SPEs
+# inputs:
+# wf -> waveform
+# SPEtick -> tick at which spe is found
+# deadtime -> how much dead-time to require after pulse
+# threshold -> threshold for secondary pulses in deadtimedelay region
+# deadtimedelay -> how many ticks to veto after SPEtick + deadime
 def CheckDeadTime(wf,SPEtick,deadtime,threshold,deadtimedelay):
-    wfsub = wf[SPEtick+deadtimedelay:SPEtick+deadtimedelay+deadtime]
-    #fig = plt.figure(figsize=(6,6))
-    #plt.plot(wfsub)
-    #plt.title('CheckDeadTime')
-    #plt.show()
-    if (np.max(wfsub) > threshold):
-        #print ('wf max is %i'%np.max(wfsub))
-        return False
-    return True
+    return False
 
 # record the waveform centered on the SPE peak
+# inputs
+# wf -> waveform
+# SPEtick -> tick at peak of SPE
+# bufferL -> how many ticks to save before the peak
+# bufferR -> how many ticks to save after the peak
 def SaveSPE(wf,SPEtick,bufferL,bufferR):
-    return wf[SPEtick+bufferL:SPEtick+bufferR]
-
+    return np.zeros(bufferL+bufferR)
 
 # get Single Photo-Electrons
-def GetSPE(waveform,BASELINECUT=BASELINEDEFAULT,BASELINETOLERANCECUT=BASETOLERANCE):
+# input:
+# waveform -> waveform
+# BASELINECUT -> baseline value
+# BASELINETOLERANCECUT -> tolerance on baseline
+# RMSMAX -> Max RMS allowed
+# returns:
+# base, rms: baseline and rms for waveform
+# spectr: how many SPEs were found on the waveform?
+# SPE_ampl_v, SPE_tick_v, SPE_wf_v: arrays of amplitude, time-tick, and actual SPE waveform for identified SPEs
+def GetSPE(waveform,BASELINECUT=BASELINEDEFAULT,BASELINETOLERANCECUT=BASETOLERANCE,RMSMAX=RMSCUT):
 
+    base = 0
+    rms = 0
     spectr = 0
-    wfctr = 0
-    baseline_v = []
-    rms_v = []
-    spe_ampl_v = []
-
-    spe_avg_v = np.zeros(DEADTIME)
-
-    waveform = waveform.astype(float)
-
-    base,rms = GetBaselineAndRMS(waveform,0,20)
-
-    if (rms == 0 or base == 0):
-        continue
-
-    baseline_v.append(base)
-    rms_v.append(rms)
-
-
-    if ( (base < BASELINECUT-BASETOLERANCE) or (base > BASELINECUT+BASETOLERANCE) ):
-        continue
-    if ( rms > RMSMAX ):
-        continue
-
-    anawf = waveform - base
-    
-    SPEtick = FindSPE(anawf,20,1500-DEADTIME,SPETHRESHOLD)
-
-    if (SPEtick == 20): continue
-    
-    if (CheckDeadTime(anawf,SPEtick,DEADTIME,DEADTHRESHOLD,DEADTIMEDELAY) == True):
-        
-        spe_wf = SaveSPE(anawf,SPEtick,-BUFFER,DEADTIME-BUFFER)
-
-        SPEmax = np.amax(spe_wf)
-            
-        spe_avg_v += spe_wf
-        spectr += 1 
-            
-        spe_ampl_v.append(SPEmax)
-
-    return spe_avg_v,spectr,baseline_v,rms_v,spe_ampl_v
+    SPE_ampl_v = []
+    SpE_tick_v = []
+    SPE_wf_v = []
+    return base, rms, spectr, SPE_ampl_v, SPE_tick_v, SPE_wf_v
