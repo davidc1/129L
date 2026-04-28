@@ -24,7 +24,7 @@ chan1 = AnalogIn(ads, 1)
 chan2 = AnalogIn(ads, 2)
 chan3 = AnalogIn(ads, 3)
 
-print(f"{'Voltage (V)':>10}")
+#print(f"{'Voltage (V)':>10}")
 
 #chan.voltage
 #chan.value
@@ -53,6 +53,6 @@ while True:
     print("VOLTAGE: \t CH0: %.02f \t CH1: %.02f \t CH2: %.02f \t CH3: %.02f"%(c0VOL,c1VOL,c2VOL,c3VOL))
     print("VALUE: \t CH0: %.02f \t CH1: %.02f \t CH2: %.02f \t CH3: %.02f"%(c0VAL,c1VAL,c2VAL,c3VAL))
     print("RAW: \t CH0: %.02f \t CH1: %.02f \t CH2: %.02f \t CH3: %.02f"%(c0RAW,c1RAW,c2RAW,c3RAW))
-    print("Solar cell voltage differential: %.02f"%(c2VOL-c3VOL))
-    print("Solar cell ADC     differential: %.02f\n"%(c2VAL-c3VAL))
+    print("Solar cell voltage \t: %.02f"%(c3VOL))
+    print("Solar cell ADC \t: %.02f\n"%(c3VAL))
     time.sleep(1)
